@@ -1,0 +1,50 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "awto-mcp-can"
+version = "0.1.0"
+description = "MCP CAN daemon — SocketCAN, DBC, ISO-TP, capture/replay; Unix socket IPC, FastMCP tools"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "awto-au" }]
+keywords = ["can", "socketcan", "mcp", "dbc", "isotp", "cantools"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: System :: Hardware :: Hardware Drivers",
+]
+requires-python = ">=3.13"
+dependencies = [
+    "mcp[cli]",
+    "python-can>=4.4",
+    "cantools>=39",
+]
+
+[project.scripts]
+awto-can-daemon = "can_daemon:main"
+awto-ttu        = "ttu_cli:main"
+
+[tool.hatch.build.targets.wheel]
+sources = ["."]
+include = [
+    "mcp_server.py",
+    "can_daemon.py",
+    "ttu_cli.py",
+    "protocol.py",
+]
+
+[dependency-groups]
+dev = []
+
+[tool.uv]
+# Free-threaded / no-GIL build.
+# On Fedora: sudo dnf install python3.14-freethreading
+# Binary: /usr/bin/python3.14t
+# Verify: python3.14t -c "import sys; print(sys._is_gil_enabled())"  -> False
+python = "3.14t"

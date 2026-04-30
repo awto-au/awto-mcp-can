@@ -1,0 +1,9 @@
+{
+  "servers": {
+    "awto-can": {
+      "type": "stdio",
+      "command": "${workspaceFolder}/.venv-ft/bin/python",
+      "args": ["${workspaceFolder}/mcp_server.py"]
+    }
+  }
+}

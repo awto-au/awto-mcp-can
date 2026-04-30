@@ -141,17 +141,50 @@ Example raw CAN command (1000 ms beep on CON):
 
 ---
 
-## Repository layout (planned, mirrors `awto-mcp-serial`)
+## Repository layout (mirrors `awto-mcp-serial`)
 
 ```
-mcp_server.py        # MCP stdio entry point
-can_daemon.py        # long-lived daemon; owns the socket + bus
-protocol.py          # wire schema (requests, responses, events)
+mcp_server.py        # FastMCP stdio server (Copilot tools)
+can_daemon.py        # long-lived daemon; owns the bus + the Unix socket
+protocol.py          # wire schema, hex/filter helpers, error codes
 ttu_cli.py           # CLI client (one-shot ops over the socket)
-test_harness.py      # vcan-based test harness
-docs/                # design notes, this README expanded, alert taxonomy
+test_harness.py      # python-can virtual-bus test suite (no hardware needed)
+docs/                # design notes, alert taxonomy, DBC files
 scripts/             # systemd unit, install helpers
-pyproject.toml
+.vscode/mcp.json     # VS Code MCP server config
+pyproject.toml       # hatchling, mcp[cli], python-can, cantools
+CODING_STYLE.md      # awto-au Python conventions
 README.md            # this file
-ISSUES.md            # mirror of open requirements issues
 ```
+
+---
+
+## Quick start
+
+```bash
+# 1. Free-threaded venv + install
+uv venv --python python3.14t .venv-ft
+uv pip install -e . --python .venv-ft/bin/python
+
+# 2a. Real bus
+sudo ip link set can0 up type can bitrate 250000
+.venv-ft/bin/python can_daemon.py --interface can0 --bitrate 250000
+
+# 2b. Or virtual bus (no kernel module / hardware needed)
+.venv-ft/bin/python can_daemon.py --bustype virtual --interface awto-test \
+    --no-allowlist --socket /tmp/awto-can.sock
+
+# 3. Drive it
+.venv-ft/bin/python ttu_cli.py ping
+.venv-ft/bin/python ttu_cli.py info
+.venv-ft/bin/python ttu_cli.py send 6f0 01e803         # CON beep 1000 ms
+.venv-ft/bin/python ttu_cli.py recv --filter 6f0/7ff --max 5 --timeout 500
+.venv-ft/bin/python ttu_cli.py request 6f0 01e803 --reply 6f1/7ff --timeout 100
+
+# 4. Tests (uses python-can 'virtual' bus — no hardware required)
+.venv-ft/bin/python test_harness.py -v
+```
+
+VS Code MCP integration is preconfigured in `.vscode/mcp.json` — once the
+daemon is running, Copilot can call the `can_*` and `con_beep` / `pdm_*`
+tools defined in `mcp_server.py`.
