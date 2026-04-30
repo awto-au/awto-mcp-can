@@ -16,7 +16,7 @@ v0.1 — design / requirements. See open issues for the work breakdown.
 
 ## Target environment
 
-- Python 3.14 (free-threaded=no)
+- Python 3.13+ (Python 3.14 free-threaded recommended; binary `python3.14t`)
 - Linux SocketCAN (`can0` @ 250 kbps default)
 - `python-can`, `cantools`, kernel `can-isotp` module
 - Default DBC: [`docs/awto_htc.dbc`](https://github.com/awto-au/l8-427/blob/main/docs/awto_htc.dbc) (from `awto-au/l8-427`)
